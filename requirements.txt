@@ -2,3 +2,19 @@
 django >6.0,<6.1
 python-decouple
 pillow
+djangorestframework
+
+# third party modules
+markdown
+django-filter
+drf-yasg[validation]
+
+# deployment modules
+
+
+# refactoring and tests
+black
+flake8
+pytest
+pytest-django
+Faker
