@@ -1,0 +1,18 @@
+{% block subject %}
+Welcome to our platform
+{% endblock %}
+
+{% block plain %}
+Hello,
+
+Thank you for joining us.  {{ name }}
+{% endblock %}
+
+{% block html %}
+<h1>Hello,</h1>
+<p>Thank you for joining us.
+http://127.0.0.1:8000/accounts/api/v1/activation/confirm/{{token}}
+</p>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUT2jLYoIC9Lg65AVA5KhEUdJdWFm0-vznZg&s" alt="">
+
+{% endblock %}

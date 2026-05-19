@@ -8,6 +8,9 @@ djangorestframework
 markdown
 django-filter
 drf-yasg[validation]
+djangorestframework-simplejwt
+djoser
+
 
 # deployment modules
 
@@ -18,3 +21,6 @@ flake8
 pytest
 pytest-django
 Faker
+
+# email third party modules
+django-templated-email
