@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage
+from .models import Category, Product, ProductImage, Review
 
 
 class ProductImageInline(admin.TabularInline):
@@ -37,3 +37,9 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ["id", "product", "is_main"]
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ["id", "product", "user", "rating", "comment", "created_date"]
+
