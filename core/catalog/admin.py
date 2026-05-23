@@ -1,13 +1,13 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, Review
+from .models import ProductCategoryModel, ProductModel, ProductImageModel
 
 
 class ProductImageInline(admin.TabularInline):
-    model = ProductImage
+    model = ProductImageModel
     extra = 1
 
 
-@admin.register(Category)
+@admin.register(ProductCategoryModel)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["id", "title", "slug"]
     prepopulated_fields = {
@@ -15,7 +15,7 @@ class CategoryAdmin(admin.ModelAdmin):
     }
 
 
-@admin.register(Product)
+@admin.register(ProductModel)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
         "id",
@@ -23,10 +23,10 @@ class ProductAdmin(admin.ModelAdmin):
         "category",
         "price",
         "stock",
-        "is_active",
+        "status",
         "created_date",
     ]
-    list_filter = ["category", "is_active", "created_date"]
+    list_filter = ["category", "status", "created_date"]
     search_fields = ["title", "description"]
     prepopulated_fields = {
         "slug": ["title"]
@@ -34,12 +34,8 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
 
 
-@admin.register(ProductImage)
+@admin.register(ProductImageModel)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ["id", "product", "is_main"]
 
-
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ["id", "product", "user", "rating", "comment", "created_date"]
 
