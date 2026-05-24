@@ -1,13 +1,10 @@
-from rest_framework import viewsets, permissions
-from rest_framework import filters
+from rest_framework import viewsets, permissions, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
-from ...models import ProductCategoryModel, ProductModel, ProductImageModel
+from ...models import ProductCategoryModel, ProductModel, ProductImageModel, WishlistProductModel
 from accounts.models import Profile
 from .serializers import CategorySerializer, ProductSerializer, ProductImageSerializer
 from .pagination import DefaultPagination
@@ -38,7 +35,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultPagination
     lookup_field = "slug"
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def toggle_wishlist(self, request, slug=None):
         product = self.get_object()
         user = request.user

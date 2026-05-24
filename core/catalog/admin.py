@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ProductCategoryModel, ProductModel, ProductImageModel
+from .models import ProductCategoryModel, ProductModel, ProductImageModel, WishlistProductModel
 
 
 class ProductImageInline(admin.TabularInline):
@@ -37,5 +37,10 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductImageModel)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ["id", "product", "is_main"]
+
+
+@admin.register(WishlistProductModel)
+class WishlistProductAdmin(admin.ModelAdmin):
+    list_display = ["id", "user", "product"]
 
 

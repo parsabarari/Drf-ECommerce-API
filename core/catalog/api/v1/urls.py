@@ -4,8 +4,8 @@ from .views import CategoryViewSet, ProductViewSet, ProductImageViewSet
 app_name = "api-v1"
 
 router = DefaultRouter()
-router.register('categories', CategoryViewSet)
-router.register('products', ProductViewSet)
-router.register('product-images', ProductImageViewSet)
+router.register('categories', CategoryViewSet, basename="category")
+router.register('products', ProductViewSet, basename="product")
+router.register('product-images', ProductImageViewSet, basename="product-image")
 
 urlpatterns = router.urls
