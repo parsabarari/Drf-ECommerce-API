@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from ...models import CartItemModel, CartModel
-from catalog.api.v1.serializers import ProductSerializer 
+from catalog.api.v1.serializers import ProductListSerializer 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True) 
+    product = ProductListSerializer(read_only=True) 
     total_item_price = serializers.ReadOnlyField()
     quantity = serializers.IntegerField(min_value=1, default=1)
  

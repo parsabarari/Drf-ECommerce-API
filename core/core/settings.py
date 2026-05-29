@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "catalog",
     "cart",
     "orders",
-    "reviews",
+    'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'templated_email',

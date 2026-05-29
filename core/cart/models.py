@@ -27,7 +27,7 @@ class CartItemModel(models.Model):
     @property
     def total_item_price(self):
         # فرض بر این است که product.final_price همان متد property است که قبلاً ساختیم
-        return self.product.get_price * self.quantity
+        return self.product.final_price * self.quantity
 
     def __str__(self):
         return f"{self.product.title} - {self.quantity}"

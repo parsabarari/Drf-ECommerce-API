@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 
 
@@ -61,14 +61,15 @@ class ProductModel(models.Model):
         return reverse("catalog:api-v1:product-detail", kwargs={"slug": self.slug})
     
     @property
-    def get_price(self):        
-        discount_amount = self.price * Decimal(self.discount_percent / 100)
-        discounted_amount = self.price - discount_amount
-        return round(discounted_amount)
+    def final_price(self):
+        discount_amount = (self.price * Decimal(self.discount_percent) / Decimal("100"))
+        final_amount = self.price - discount_amount
+        return final_amount.quantize(Decimal("0.01"),rounding=ROUND_HALF_UP)
     
     def is_discounted(self):
         return self.discount_percent != 0
     
+    @property
     def is_published(self):
         return self.status == ProductStatusType.publish.value
 

@@ -2,17 +2,19 @@ from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import MethodNotAllowed
 
 from catalog.models import ProductModel, ProductStatusType
 from ...models import CartModel, CartItemModel
 from .serializers import CartSerializer, CartItemSerializer, CartSerializer
-
+from ...services.cart import CartService
 
 
 
 class CartViewSet(viewsets.ReadOnlyModelViewSet): # فقط خواندنی چون تغییرات از طریق CartItem gérer می‌شود
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post']
 
     def get_queryset(self):
         # کاربر فقط سبد خرید خودش را ببیند
@@ -20,10 +22,20 @@ class CartViewSet(viewsets.ReadOnlyModelViewSet): # فقط خواندنی چون
 
     @action(detail=False, methods=['post'])
     def clear(self, request):
-        cart = self.get_queryset().first()
-        if cart:
-            cart.cart_items.all().delete()
-        return Response({"detail": "Cart cleared successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+        cart = CartService.get_or_create_cart(
+            request.user
+        )
+
+        CartService.clear_cart(cart)
+
+        return Response(
+            {"detail": "Cart cleared successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
+    
+    def retrieve(self, request, *args, **kwargs):
+        raise MethodNotAllowed("GET")
 
 
 
@@ -35,48 +47,25 @@ class CartItemViewSet(viewsets.ModelViewSet):
         # آیتم‌های سبد خرید کاربر فعلی
         return CartItemModel.objects.filter(cart__user=self.request.user)
 
-    def get_cart(self):
-        # گرفتن سبد خرید کاربر یا ساختن آن در صورت نبودن
-        cart, created = CartModel.objects.get_or_create(user=self.request.user)
-        return cart
-
     def perform_create(self, serializer):
-        # هنگام اضافه کردن آیتم جدید
+
         product_id = self.request.data.get("product_id")
-        quantity = self.request.data.get("quantity", 1)
+        quantity = int(self.request.data.get("quantity", 1))
 
-        if not product_id:
-            raise serializers.ValidationError({"product_id": "Product ID is required."})
-
-        try:
-            product = ProductModel.objects.get(id=product_id, status=ProductStatusType.publish.value)
-        except ProductModel.DoesNotExist:
-            raise serializers.ValidationError({"product": "Product not found or not published."})
-        
-        cart = self.get_cart()
-
-        # بررسی اینکه آیا محصول از قبل در سبد هست یا نه
-        cart_item, created = CartItemModel.objects.get_or_create(cart=cart, product_id=product_id)
-        
-        if created:
-            cart_item.quantity = quantity
-        else:
-            # اگر محصول از قبل بود، تعداد را اضافه کن
-            cart_item.quantity += quantity
-        
-        cart_item.save()
-        # نیازی به serializing اینجا نیست، چون response از CartSerializer می‌آید
-        # serializer.save() # این خط را حذف کن
+        CartService.add_item(
+            user=self.request.user,
+            product_id=product_id,
+            quantity=quantity
+        )
 
     def perform_update(self, serializer):
-        instance = serializer.instance
-        quantity = int(self.request.data.get("quantity"))
 
-        if quantity <= 0:
-            instance.delete()
-        else:
-            instance.quantity = quantity
-            instance.save()
+        quantity = int(self.request.data.get("quantity", 1))
+
+        CartService.update_item(
+            serializer.instance,
+            quantity
+        )
 
     def perform_destroy(self, instance):
         instance.delete()
@@ -87,7 +76,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
-        cart = self.get_cart()
+        cart = CartService.get_or_create_cart(request.user)
         cart_serializer = CartSerializer(cart) # استفاده از CartSerializer برای خروجی
         return Response(cart_serializer.data, status=status.HTTP_200_OK) # یا 201 اگر آیتم جدید اضافه شده
 
@@ -98,7 +87,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         
-        cart = self.get_cart()
+        cart = CartService.get_or_create_cart(request.user)
         cart_serializer = CartSerializer(cart)
         return Response(cart_serializer.data, status=status.HTTP_200_OK)
 
@@ -106,7 +95,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         
-        cart = self.get_cart()
+        cart = CartService.get_or_create_cart(request.user)
         cart_serializer = CartSerializer(cart)
         return Response(cart_serializer.data, status=status.HTTP_200_OK)
 

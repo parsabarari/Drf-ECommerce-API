@@ -5,34 +5,32 @@ from rest_framework import status
 
 from .serializers import ReviewSerializer
 from ...models import ReviewModel, ReviewStatusType
+from ...permissions import IsOwnerOrAdmin
 from catalog.models import ProductModel
 
 
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     queryset = ReviewModel.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwnerOrAdmin, IsAuthenticated]
+    http_method_names = [
+        'get',
+        'post',
+        'patch',
+        'delete'
+    ]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return ReviewModel.objects.all()
-        return ReviewModel.objects.filter(user=user, status=ReviewStatusType.accepted.value)
+        return ReviewModel.objects.filter(user=user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != request.user and not request.user.is_staff:
-            return Response({"detail": "شما اجازه حذف این نظر را ندارید."}, status=status.HTTP_403_FORBIDDEN)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.user != request.user and not request.user.is_staff:
-            return Response({"detail": "شما اجازه ویرایش این نظر را ندارید."}, status=status.HTTP_403_FORBIDDEN)
         
         # If the user is not staff, they can only edit their own reviews, and the status should not be changed
         if not request.user.is_staff:
