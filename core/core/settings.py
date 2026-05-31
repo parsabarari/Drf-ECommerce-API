@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "catalog",
     "cart",
     "orders",
+    "payment",
     'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tehran"
 
 USE_I18N = True
 
