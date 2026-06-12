@@ -13,6 +13,7 @@ djoser
 
 
 # deployment modules
+psycopg2-binary
 
 
 # refactoring and tests
