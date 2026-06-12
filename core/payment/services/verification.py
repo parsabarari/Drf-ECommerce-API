@@ -1,4 +1,3 @@
-from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from cart.models import CartModel
@@ -16,7 +15,6 @@ from payment.models import (
 class PaymentVerificationService:
 
     @staticmethod
-    @transaction.atomic
     def verify_payment(*, authority):
 
         payment = (

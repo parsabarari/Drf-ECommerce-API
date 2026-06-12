@@ -21,6 +21,7 @@ flake8
 pytest
 pytest-django
 Faker
+factory-boy
 
 # email third party modules
 django-templated-email
