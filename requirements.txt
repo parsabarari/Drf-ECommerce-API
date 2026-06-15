@@ -14,7 +14,7 @@ djoser
 
 # deployment modules
 psycopg2-binary
-
+gunicorn
 
 # refactoring and tests
 black
