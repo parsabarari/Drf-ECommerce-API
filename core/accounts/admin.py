@@ -7,14 +7,14 @@ from .models import User, Profile
 
 class CustomUserAdmin(UserAdmin):
     model = User
-    list_display = ('email', 'is_superuser', 'is_active', 'is_verified')
-    list_filter = ('email', 'is_superuser', 'is_active', 'is_verified')
-    searching_fields = ('email',)
-    ordering = ('email',)
+    list_display = ('phone_number', 'is_superuser', 'is_active', 'is_verified')
+    list_filter = ('phone_number', 'is_superuser', 'is_active', 'is_verified')
+    searching_fields = ('phone_number',)
+    ordering = ('phone_number',)
     fieldsets = (
         ('Authentication', {
             "fields": (
-                'email', 'password'
+                'phone_number', 'email', 'password'
             ),
         }),
         ('permissions', {
@@ -36,7 +36,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active', 'is_superuser', 'is_verified')
+            'fields': ('phone_number', 'password1', 'password2', 'is_staff', 'is_active', 'is_superuser', 'is_verified')
         }),
     )
 
