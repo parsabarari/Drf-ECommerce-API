@@ -1,16 +1,11 @@
 from rest_framework import serializers
 
-from payment.models import (
-    PaymentModel,
-)
+from payment.models import (PaymentModel,)
 
 
-class PaymentSerializer(
-    serializers.ModelSerializer
-):
+class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
-
         model = PaymentModel
 
         fields = [
@@ -24,15 +19,10 @@ class PaymentSerializer(
         ]
 
 
-class CreatePaymentSerializer(
-    serializers.Serializer
-):
-
+class CreatePaymentSerializer(serializers.Serializer):
     order_id = serializers.IntegerField()
 
 
-class VerifyPaymentSerializer(
-    serializers.Serializer
-):
-
+class VerifyPaymentSerializer(serializers.Serializer):
     authority = serializers.CharField()
+

@@ -191,3 +191,22 @@ CACHES = {
 SMS_IR_API_KEY = "OStbdbRJyLkMXw9EO3N3gf3VlQUrQo7LKn6n190dNHrbhc2e"
 SMS_IR_TEMPLATE_ID = 397164
 
+
+# gateway settings
+ZARINPAL_SANDBOX = True  # در پروداکشن False می‌شود
+
+# در نسخه v4، برای سندباکس هم از همان بیس اصلی استفاده می‌شود، اما پیشوند وب‌سرویس تفاوت دارد
+if ZARINPAL_SANDBOX:
+    ZARINPAL_MERCHANT_ID = "00000000-0000-0000-0000-000000000000"
+    ZARINPAL_REQUEST_URL = "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
+    ZARINPAL_VERIFY_URL = "https://sandbox.zarinpal.com/pg/v4/payment/verify.json"
+    # لینک ریدایرکت کاربر به بانک در حالت سندباکس
+    ZARINPAL_START_PAY_URL = "https://sandbox.zarinpal.com/pg/StartPay/"
+else:
+    ZARINPAL_MERCHANT_ID = "your-real-merchant-id"
+    ZARINPAL_REQUEST_URL = "https://api.zarinpal.com/pg/v4/payment/request.json"
+    ZARINPAL_VERIFY_URL = "https://api.zarinpal.com/pg/v4/payment/verify.json"
+    ZARINPAL_START_PAY_URL = "https://www.zarinpal.com/pg/StartPay/"
+
+# آدرسی که بانک کاربر را به آن برمی‌گرداند (دقیقاً روت اکشن شما)
+ZARINPAL_CALLBACK_URL = "http://127.0.0.1:8000/payment/api/v1/payments/verify-callback/"
