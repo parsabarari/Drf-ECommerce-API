@@ -16,6 +16,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from jwt.exceptions import ExpiredSignatureError,InvalidSignatureError
 import jwt
+from django.contrib.auth import get_user_model
+from rest_framework.throttling import ScopedRateThrottle
+
+from .serializers import RequestOTPSerializer, VerifyOTPSerializer
+from ...utils import OTPManager
+from ...services import SmsService
 
 
 
@@ -144,4 +150,68 @@ class ActivationResendApiView(generics.GenericAPIView):
     def get_tokens_for_user(self,user):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
+
+
+# otp
+
+User = get_user_model()
+
+
+class RequestOTPView(APIView):
+    """اندپوینت درخواست کد OTP"""
+    
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'otp_request'
+
+    serializer_class = RequestOTPSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        mobile = serializer.validated_data["mobile"]
+        
+        # تولید و ذخیره کد در Redis
+        code = OTPManager.generate_code()
+        OTPManager.store_otp(mobile, code)
+        
+        # ارسال پیامک
+        sms_sent = SmsService.send_otp(mobile, code)
+        print(f"======= TEST OTP CODE: {code} =======")
+        if sms_sent:
+            return Response({"detail": "کد تایید ارسال شد."}, status=status.HTTP_200_OK)
+        
+        # در پروداکشن برای راحتی دیباگ ترجیحا در محیط لوکال کد رو لاگ کنید، نه در ریسپانس
+        return Response(
+            {"detail": "خطا در ارسال پیامک. لطفا دوباره تلاش کنید."}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+class VerifyOTPView(APIView):
+    """اندپوینت تایید کد OTP"""
+    serializer_class = VerifyOTPSerializer
+    
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        mobile = serializer.validated_data["mobile"]
+        code = serializer.validated_data["code"]
+        
+        # بررسی صحت کد
+        if not OTPManager.verify_otp(mobile, code):
+            return Response({"detail": "کد وارد شده اشتباه است یا منقضی شده."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # ساخت یا دریافت کاربر (فرض بر این است که USERNAME_FIELD شما mobile است یا فیلد متمایزی دارید)
+        user, created = User.objects.get_or_create(username=mobile, defaults={"is_active": True})
+        
+        # صدور توکن JWT
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "is_new_user": created
+        }, status=status.HTTP_200_OK)
 

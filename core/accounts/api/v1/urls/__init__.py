@@ -4,5 +4,6 @@ app_name = 'api-v1'
 
 urlpatterns = [
     path('',include('accounts.api.v1.urls.accounts')),
-    path('profile/', include('accounts.api.v1.urls.profile'))
+    path('profile/', include('accounts.api.v1.urls.profile')),
+    path('otp/', include('accounts.api.v1.urls.verification')),
 ]

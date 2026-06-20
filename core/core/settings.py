@@ -155,7 +155,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',  # هر آی‌پی ناشناس نهایتا ۵ درخواست در دقیقه
+        'otp_request': '10/minute',  # ریت اختصاصی برای متد درخواست پیامک
+    }
 }
 
 # email register 
@@ -170,4 +177,17 @@ EMAIL_PORT = 25
 TEMPLATED_EMAIL_DEFAULT_FROM_EMAIL = 'no-reply@example.com'
 
 LOGIN_URL = '/admin/login/'
+
+# caching configs
+# تنظیمات موقت برای تست بدون نیاز به ردیس
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+# برای اینکه در فاز تست هزینه‌ای برای SMS ندهی و منتظر خط هم نمانی:
+SMS_IR_API_KEY = "OStbdbRJyLkMXw9EO3N3gf3VlQUrQo7LKn6n190dNHrbhc2e"
+SMS_IR_TEMPLATE_ID = 397164
 
