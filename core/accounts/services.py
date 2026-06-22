@@ -20,7 +20,11 @@ class SmsService:
             "mobile": mobile,
             "templateId": settings.SMS_IR_TEMPLATE_ID,
             "parameters": [
+<<<<<<< Updated upstream
                 {"name": "Code", "value": str(code)}  # نام پارامتر باید با قالب sms.ir یکی باشد
+=======
+                {"name": "CODE", "value": str(code)}  # نام پارامتر باید با قالب sms.ir یکی باشد
+>>>>>>> Stashed changes
             ]
         }
         

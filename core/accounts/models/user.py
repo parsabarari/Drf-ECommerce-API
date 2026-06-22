@@ -42,7 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
-    email = models.EmailField(max_length=255,unique=True)
+    email = models.EmailField(max_length=255,unique=True, null=True, blank=True)
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
 

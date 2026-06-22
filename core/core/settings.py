@@ -187,9 +187,15 @@ CACHES = {
     }
 }
 
+<<<<<<< Updated upstream
 # برای اینکه در فاز تست هزینه‌ای برای SMS ندهی و منتظر خط هم نمانی:
 SMS_IR_API_KEY = "OStbdbRJyLkMXw9EO3N3gf3VlQUrQo7LKn6n190dNHrbhc2e"
 SMS_IR_TEMPLATE_ID = 397164
+=======
+# otp
+SMS_IR_API_KEY = "MHWVh7y5DdsVZQAKw0XHjLuhhb9n7qxZHF6qd39IvABBUAdS"
+SMS_IR_TEMPLATE_ID = 123456
+>>>>>>> Stashed changes
 
 
 # gateway settings
