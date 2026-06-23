@@ -204,7 +204,7 @@ class VerifyOTPView(APIView):
             return Response({"detail": "کد وارد شده اشتباه است یا منقضی شده."}, status=status.HTTP_400_BAD_REQUEST)
         
         # ساخت یا دریافت کاربر (فرض بر این است که USERNAME_FIELD شما mobile است یا فیلد متمایزی دارید)
-        user, created = User.objects.get_or_create(username=mobile, defaults={"is_active": True})
+        user, created = User.objects.get_or_create(phone_number=mobile, defaults={"is_active": True, "email": f"{mobile}@temporary.com"})
         
         # صدور توکن JWT
         refresh = RefreshToken.for_user(user)
