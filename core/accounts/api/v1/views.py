@@ -157,7 +157,7 @@ class ActivationResendApiView(generics.GenericAPIView):
 User = get_user_model()
 
 
-class RequestOTPView(APIView):
+class RequestOTPView(generics.GenericAPIView):
     """اندپوینت درخواست کد OTP"""
     
     throttle_classes = [ScopedRateThrottle]
@@ -166,47 +166,45 @@ class RequestOTPView(APIView):
     serializer_class = RequestOTPSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         mobile = serializer.validated_data["mobile"]
         
-        # تولید و ذخیره کد در Redis
         code = OTPManager.generate_code()
         OTPManager.store_otp(mobile, code)
         
-        # ارسال پیامک
         sms_sent = SmsService.send_otp(mobile, code)
         print(f"======= TEST OTP CODE: {code} =======")
         if sms_sent:
             return Response({"detail": "کد تایید ارسال شد."}, status=status.HTTP_200_OK)
         
-        # در پروداکشن برای راحتی دیباگ ترجیحا در محیط لوکال کد رو لاگ کنید، نه در ریسپانس
         return Response(
             {"detail": "خطا در ارسال پیامک. لطفا دوباره تلاش کنید."}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-class VerifyOTPView(APIView):
+class VerifyOTPView(generics.GenericAPIView):
     """اندپوینت تایید کد OTP"""
     serializer_class = VerifyOTPSerializer
     
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         mobile = serializer.validated_data["mobile"]
-        code = serializer.validated_data["code"]
+        code = serializer.validated_data["code"].strip()
         
-        # بررسی صحت کد
         if not OTPManager.verify_otp(mobile, code):
             return Response({"detail": "کد وارد شده اشتباه است یا منقضی شده."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # ساخت یا دریافت کاربر (فرض بر این است که USERNAME_FIELD شما mobile است یا فیلد متمایزی دارید)
         user, created = User.objects.get_or_create(phone_number=mobile, defaults={"is_active": True, "email": f"{mobile}@temporary.com"})
         
-        # صدور توکن JWT
+        if created:
+            user.is_verified = True
+            user.save()
+
         refresh = RefreshToken.for_user(user)
         
         return Response({
