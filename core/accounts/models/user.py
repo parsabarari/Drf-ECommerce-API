@@ -8,6 +8,7 @@ class UserManager(BaseUserManager):
     custom user model manager where email is the unique identifiers
     for authentication instead of usernames.
     '''
+
     def create_user(self, phone_number, email=None, **extra_fields):
         if not phone_number:
             raise ValueError("phone number must be set")
@@ -29,6 +30,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_verified', True)
+
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError('superuser must have is_staff=True.')
@@ -40,6 +42,7 @@ class UserManager(BaseUserManager):
             user.set_password(password)
             user.save(using=self._db)
         return user
+
     
 
 class User(AbstractBaseUser, PermissionsMixin):
