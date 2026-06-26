@@ -147,6 +147,18 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = 'accounts.User'
 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -155,7 +167,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',  # هر آی‌پی ناشناس نهایتا ۵ درخواست در دقیقه
+        'otp_request': '10/minute',  # ریت اختصاصی برای متد درخواست پیامک
+    }
 }
 
 # email register 
@@ -171,3 +190,35 @@ TEMPLATED_EMAIL_DEFAULT_FROM_EMAIL = 'no-reply@example.com'
 
 LOGIN_URL = '/admin/login/'
 
+# caching configs
+# تنظیمات موقت برای تست بدون نیاز به ردیس
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+# otp
+SMS_IR_API_KEY = "MHWVh7y5DdsVZQAKw0XHjLuhhb9n7qxZHF6qd39IvABBUAdS"
+SMS_IR_TEMPLATE_ID = 123456
+
+
+# gateway settings
+ZARINPAL_SANDBOX = True  # در پروداکشن False می‌شود
+
+# در نسخه v4، برای سندباکس هم از همان بیس اصلی استفاده می‌شود، اما پیشوند وب‌سرویس تفاوت دارد
+if ZARINPAL_SANDBOX:
+    ZARINPAL_MERCHANT_ID = "00000000-0000-0000-0000-000000000000"
+    ZARINPAL_REQUEST_URL = "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
+    ZARINPAL_VERIFY_URL = "https://sandbox.zarinpal.com/pg/v4/payment/verify.json"
+    # لینک ریدایرکت کاربر به بانک در حالت سندباکس
+    ZARINPAL_START_PAY_URL = "https://sandbox.zarinpal.com/pg/StartPay/"
+else:
+    ZARINPAL_MERCHANT_ID = "your-real-merchant-id"
+    ZARINPAL_REQUEST_URL = "https://api.zarinpal.com/pg/v4/payment/request.json"
+    ZARINPAL_VERIFY_URL = "https://api.zarinpal.com/pg/v4/payment/verify.json"
+    ZARINPAL_START_PAY_URL = "https://www.zarinpal.com/pg/StartPay/"
+
+# آدرسی که بانک کاربر را به آن برمی‌گرداند (دقیقاً روت اکشن شما)
+ZARINPAL_CALLBACK_URL = "http://127.0.0.1:8000/payment/api/v1/payments/verify-callback/"

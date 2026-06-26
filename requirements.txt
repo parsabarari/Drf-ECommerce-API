@@ -26,3 +26,8 @@ factory-boy
 
 # email third party modules
 django-templated-email
+
+# background process and cache
+celery
+redis
+django-redis

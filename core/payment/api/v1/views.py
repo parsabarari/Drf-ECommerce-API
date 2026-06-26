@@ -58,3 +58,25 @@ class PaymentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         )
 
         return Response(PaymentSerializer(payment).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=["get"], url_path="verify-callback")
+    def verify_callback(self, request):
+        """
+        اندpoint اختصاصی برای دریافت کاربر شوت شده از سمت بانک.
+        زرین‌پال دیتا را به صورت متد GET به این روت می‌فرستد.
+        """
+        authority = request.query_params.get("Authority")
+        status_param = request.query_params.get("Status")
+
+        if not authority:
+            return Response({"detail": "Authority token is missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # صدا زدن لایه سرویس با انتقال وضعیت ارسالی بانک
+        payment = PaymentVerificationService.verify_payment(
+            authority=authority,
+            status_param=status_param
+        )
+
+        # پس از صحت پرداخت، می‌توانید کاربر را به یک صفحه لندینگ موفقیت‌آمیز در فرانت‌انداز ریدایرکت کنید
+        # return redirect("https://my-frontend.com/payment/success")
+        return Response(PaymentSerializer(payment).data, status=status.HTTP_200_OK)

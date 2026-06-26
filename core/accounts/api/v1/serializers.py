@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from accounts.models import Profile
+import re
 
 
 
@@ -119,4 +120,25 @@ class ActivationResendSerializer(serializers.Serializer):
 
         attrs['user'] = user_obj
         return super().validate(attrs)
+
+class RequestOTPSerializer(serializers.Serializer):
+    mobile = serializers.CharField(max_length=11)
+
+    def validate_mobile(self, value):
+        # بررسی فرمت شماره موبایل‌های ایران
+        pattern = r"^09\d{9}$"
+        if not re.match(pattern, value):
+            raise serializers.ValidationError("شماره موبایل وارد شده معتبر نیست.")
+        return value
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    mobile = serializers.CharField(max_length=11)
+    code = serializers.CharField(max_length=5, min_length=5)
+
+    def validate_mobile(self, value):
+        if not re.match(r"^09\d{9}$", value):
+            raise serializers.ValidationError("شماره موبایل وارد شده معتبر نیست.")
+        return value
+
 
